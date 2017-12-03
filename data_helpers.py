@@ -1,9 +1,10 @@
+from os import listdir
+from os.path import isfile, join
+import logging
 import numpy as np
 import re
 import itertools
 from collections import Counter
-from os import listdir
-from os.path import isfile, join
 
 
 def clean_str(string):
@@ -29,6 +30,7 @@ def clean_str(string):
 
 # def load_data_and_labels(positive_data_file, negative_data_file):
 def load_data(dir_name):
+    #print dir_name
     onlyfiles = [f for f in listdir(dir_name) if isfile(join(dir_name, f))]
     y = []
     x_text = []
@@ -44,9 +46,10 @@ def load_data(dir_name):
     one_hot = np.zeros((num_labels, num_labels), int)
     np.fill_diagonal(one_hot, 1)
     label_dict = dict(zip(labels_unique, one_hot))
-    print num_labels, label_dict
-    x_text = np.array([clean_str(sent) for sent in x_text]
-    y=np.array([label_dict[i].toList() for i in y])
+    #print num_labels, label_dict
+    x_text = np.array([clean_str(sent) for sent in x_text])
+
+    y = np.array([label_dict[i] for i in y])
     return [x_text, y, label_dict]
 
 
@@ -54,17 +57,23 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """
     Generates a batch iterator for a dataset.
     """
-    data=np.array(data)
-    data_size=len(data)
-    num_batches_per_epoch=int((len(data) - 1) / batch_size) + 1
+    data = np.array(data)
+    data_size = len(data)
+    num_batches_per_epoch = int((len(data) - 1) / batch_size) + 1
     for epoch in range(num_epochs):
         # Shuffle the data at each epoch
         if shuffle:
-            shuffle_indices=np.random.permutation(np.arange(data_size))
-            shuffled_data=data[shuffle_indices]
+            shuffle_indices = np.random.permutation(np.arange(data_size))
+            shuffled_data = data[shuffle_indices]
         else:
-            shuffled_data=data
+            shuffled_data = data
         for batch_num in range(num_batches_per_epoch):
-            start_index=batch_num * batch_size
-            end_index=min((batch_num + 1) * batch_size, data_size)
+            start_index = batch_num * batch_size
+            end_index = min((batch_num + 1) * batch_size, data_size)
             yield shuffled_data[start_index:end_index]
+
+
+if __name__ == "__main__":
+    train_file = './data/stance/'
+    x, y, labels = load_data(train_file)
+    print labels

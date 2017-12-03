@@ -92,4 +92,5 @@ def build_vocab(sentences):
 
 if __name__ == "__main__":
     train_file = './data/stance/'
-    load_data(train_file)
+    x, y, labels = load_data(train_file)
+    print labels
